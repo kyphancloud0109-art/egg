@@ -1,1 +1,1 @@
-loadstring(game:HttpGet("https://raw.githubusercontent.com/WhiteX1208/Scripts/refs/heads/main/StealAnEggs.luau"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/kyphancloud0109-art/egg/refs/heads/main/stealanegg.lua"))()

@@ -1,6 +1,6 @@
 -- =========================================================================
---   ♾️ GOJO HUB - STEAL AN EGG 🥚 (NO KEY EDITION)
---   THE HONORED ONE · AUTO LOAD & ZERO ADS · LIMITLESS SYSTEM
+--   ♾️ GOJO HUB - STEAL AN EGG 🥚 (100% REBRANDED & NO KEY)
+--   THE HONORED ONE · FULL GOJO SATORU THEME · ZERO TRACES OF CHILLI
 -- =========================================================================
 
 local TweenService = game:GetService("TweenService")
@@ -11,17 +11,81 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local TargetScriptUrl = "https://raw.githubusercontent.com/robvxs24/freemium/refs/heads/main/chilliv5beta.lua"
 
--- Assets & Icons
-local GojoAvatarId = "rbxassetid://92622270383869"
+-- Gojo Satoru Logo Asset ID
+local GOJO_LOGO_ID = "rbxassetid://11486398809"
+local OLD_CHILLI_ASSET = "92622270383869"
 
 task.spawn(function()
     pcall(function()
-        ContentProvider:PreloadAsync({ GojoAvatarId })
+        ContentProvider:PreloadAsync({ GOJO_LOGO_ID })
     end)
 end)
 
 -- =========================================================================
---   THÔNG BÁO LIVE TOAST (FLOATING STATUS NOTIFICATION)
+--   BỘ LỌC TỰ ĐỘNG THAY THẾ TOÀN BỘ GIAO DIỆN (UI OVERRIDE ENGINE)
+--   Tự động phát hiện và chuyển đổi mọi chữ / logo Chilli sang Gojo Hub
+-- =========================================================================
+local function CleanElement(inst: Instance)
+    pcall(function()
+        if inst:IsA("TextLabel") or inst:IsA("TextButton") or inst:IsA("TextBox") then
+            local txt = inst.Text
+            if txt and (txt:find("Chilli", 1, true) or txt:find("chilli", 1, true) or txt:find("CHILLI", 1, true) or txt:find("🌶️", 1, true)) then
+                local newTxt = txt:gsub("Chilli Hub V5", "Gojo Hub ♾️")
+                                  :gsub("Chilli Hub", "Gojo Hub")
+                                  :gsub("Chilli SAE", "Gojo SAE")
+                                  :gsub("Chilli", "Gojo")
+                                  :gsub("chilli", "gojo")
+                                  :gsub("🌶️", "♾️")
+                inst.Text = newTxt
+            end
+        elseif inst:IsA("ImageLabel") or inst:IsA("ImageButton") then
+            if inst.Image and inst.Image:find(OLD_CHILLI_ASSET, 1, true) then
+                inst.Image = GOJO_LOGO_ID
+            end
+        end
+    end)
+end
+
+local function StartUiMonitor()
+    local roots = { CoreGui, LocalPlayer:FindFirstChild("PlayerGui") }
+    if gethui then pcall(function() table.insert(roots, gethui()) end) end
+
+    for _, root in ipairs(roots) do
+        if root then
+            -- Quét sạch cây UI hiện có
+            for _, desc in ipairs(root:GetDescendants()) do
+                CleanElement(desc)
+                if desc:IsA("TextLabel") or desc:IsA("TextButton") or desc:IsA("TextBox") then
+                    desc:GetPropertyChangedSignal("Text"):Connect(function()
+                        CleanElement(desc)
+                    end)
+                elseif desc:IsA("ImageLabel") or desc:IsA("ImageButton") then
+                    desc:GetPropertyChangedSignal("Image"):Connect(function()
+                        CleanElement(desc)
+                    end)
+                end
+            end
+
+            -- Theo dõi liên tục các element mới sinh ra
+            root.DescendantAdded:Connect(function(desc)
+                task.wait()
+                CleanElement(desc)
+                if desc:IsA("TextLabel") or desc:IsA("TextButton") or desc:IsA("TextBox") then
+                    desc:GetPropertyChangedSignal("Text"):Connect(function()
+                        CleanElement(desc)
+                    end)
+                elseif desc:IsA("ImageLabel") or desc:IsA("ImageButton") then
+                    desc:GetPropertyChangedSignal("Image"):Connect(function()
+                        CleanElement(desc)
+                    end)
+                end
+            end)
+        end
+    end
+end
+
+-- =========================================================================
+--   THÔNG BÁO LIVE TOAST
 -- =========================================================================
 local function ShowGojoToast(title: string, message: string, duration: number?)
     duration = duration or 4
@@ -115,7 +179,7 @@ local function ShowGojoToast(title: string, message: string, duration: number?)
 end
 
 -- =========================================================================
---   MÀN HÌNH TẢI HIỆN ĐẠI GOJO HUB (SPLASH LOADER SCREEN)
+--   MÀN HÌNH TẢI GOJO HUB (SPLASH LOADER)
 -- =========================================================================
 local function ShowLoadingScreen(onFinished: () -> ())
     if CoreGui:FindFirstChild("GojoHub_LoaderUI") then CoreGui.GojoHub_LoaderUI:Destroy() end
@@ -143,7 +207,6 @@ local function ShowLoadingScreen(onFinished: () -> ())
     CardStroke.Color = Color3.fromRGB(56, 189, 248)
     CardStroke.Thickness = 1.4
 
-    -- Thanh dải màu phát sáng tím - xanh ngọc
     local TopAccent = Instance.new("Frame")
     TopAccent.Size = UDim2.new(1, 0, 0, 3)
     TopAccent.Position = UDim2.new(0, 0, 0, 0)
@@ -158,7 +221,6 @@ local function ShowLoadingScreen(onFinished: () -> ())
         ColorSequenceKeypoint.new(1, Color3.fromRGB(56, 189, 248))
     })
 
-    -- Logo 6 Mắt / Vô Hạn
     local LogoBox = Instance.new("Frame")
     LogoBox.Size = UDim2.new(0, 50, 0, 50)
     LogoBox.Position = UDim2.new(0.5, -25, 0, 22)
@@ -195,14 +257,13 @@ local function ShowLoadingScreen(onFinished: () -> ())
     StatusLabel.Size = UDim2.new(1, 0, 0, 18)
     StatusLabel.Position = UDim2.new(0, 0, 0, 104)
     StatusLabel.BackgroundTransparency = 1
-    StatusLabel.Text = "Đang khởi động hệ thống No-Key..."
+    StatusLabel.Text = "Đang áp dụng giao diện Gojo Hub..."
     StatusLabel.TextColor3 = Color3.fromRGB(148, 163, 184)
     StatusLabel.TextSize = 10.5
     StatusLabel.Font = Enum.Font.GothamMedium
     StatusLabel.ZIndex = 52
     StatusLabel.Parent = MainCard
 
-    -- Thanh tiến trình (Progress Bar)
     local BarBg = Instance.new("Frame")
     BarBg.Size = UDim2.new(1, -60, 0, 8)
     BarBg.Position = UDim2.new(0, 30, 0, 142)
@@ -229,32 +290,30 @@ local function ShowLoadingScreen(onFinished: () -> ())
     VersionFooter.Size = UDim2.new(1, 0, 0, 16)
     VersionFooter.Position = UDim2.new(0, 0, 0, 164)
     VersionFooter.BackgroundTransparency = 1
-    VersionFooter.Text = "Steal An Egg 🥚 • No Key Edition"
+    VersionFooter.Text = "Steal An Egg 🥚 • Gojo Edition"
     VersionFooter.TextColor3 = Color3.fromRGB(100, 116, 139)
     VersionFooter.TextSize = 9.5
     VersionFooter.Font = Enum.Font.GothamMedium
     VersionFooter.ZIndex = 52
     VersionFooter.Parent = MainCard
 
-    -- Hiệu ứng chạy thanh tiến trình
     task.spawn(function()
         task.wait(0.2)
-        TweenService:Create(BarFill, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            Size = UDim2.new(0.65, 0, 1, 0)
+        TweenService:Create(BarFill, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            Size = UDim2.new(0.7, 0, 1, 0)
         }):Play()
 
-        StatusLabel.Text = "Đang tải dữ liệu Steal An Egg..."
-        task.wait(0.6)
+        StatusLabel.Text = "Đang chuyển đổi menu thành Gojo Hub..."
+        task.wait(0.5)
 
-        TweenService:Create(BarFill, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        TweenService:Create(BarFill, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
             Size = UDim2.new(1, 0, 1, 0)
         }):Play()
 
-        StatusLabel.Text = "Kích hoạt thành công!"
+        StatusLabel.Text = "Hoàn tất! Đang mở menu..."
         StatusLabel.TextColor3 = Color3.fromRGB(74, 222, 128)
-        task.wait(0.4)
+        task.wait(0.35)
 
-        -- Đóng màn hình tải với hiệu ứng phóng nhẹ
         local closeTween = TweenService:Create(MainCard, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
             Size = UDim2.new(0, 320, 0, 180),
             BackgroundTransparency = 1
@@ -268,17 +327,47 @@ local function ShowLoadingScreen(onFinished: () -> ())
 end
 
 -- =========================================================================
---   LUỒNG CHẠY CHÍNH (AUTO LOAD SCRIPT)
+--   LUỒNG CHẠY CHÍNH: PATCH NỘI DUNG SCRIPT TRONG BỘ NHỚ
 -- =========================================================================
 ShowLoadingScreen(function()
-    ShowGojoToast("GOJO HUB ♾️ KÍCH HOẠT", "Đã mở thành công bản No-Key! Chúc bạn chơi vui vẻ.", 4.5)
-
-    getgenv().GojoHub_Active = true
-    getgenv().ChilliV5_Active = true
+    StartUiMonitor()
+    ShowGojoToast("GOJO HUB ♾️", "Đã đổi tên và kích hoạt Gojo Hub thành công!", 4)
 
     task.spawn(function()
-        pcall(function()
-            loadstring(game:HttpGet(TargetScriptUrl))()
+        local ok, rawCode = pcall(function()
+            return game:HttpGet(TargetScriptUrl, true)
         end)
+
+        if ok and type(rawCode) == "string" and #rawCode > 50 then
+            -- 1. Đổi tiêu đề menu chính và Logo thành Gojo
+            rawCode = rawCode:gsub('local NEW_TITLE, LOGO_ID = "[^"]*", "[^"]*"', 
+                                  'local NEW_TITLE, LOGO_ID = "Gojo Hub ♾️", "' .. GOJO_LOGO_ID .. '"')
+
+            -- 2. Đổi toàn bộ các chuỗi text và bản quyền Chilli sang Gojo Hub
+            rawCode = rawCode:gsub('"Chilli Hub V5"', '"Gojo Hub ♾️"')
+                             :gsub('"Chilli Hub"', '"Gojo Hub"')
+                             :gsub('"Chilli SAE"', '"Gojo SAE"')
+                             :gsub('Chilli Hub V5', 'Gojo Hub ♾️')
+                             :gsub('Chilli Hub', 'Gojo Hub')
+                             :gsub('Chilli SAE', 'Gojo SAE')
+                             :gsub('ChilliV5', 'GojoHub')
+                             :gsub('Chilli', 'Gojo')
+                             :gsub('chillihubv5', 'gojohub')
+                             :gsub('chilli', 'gojo')
+                             :gsub('🌶️', '♾️')
+                             :gsub(OLD_CHILLI_ASSET, GOJO_LOGO_ID:match("%d+"))
+
+            -- Chạy script đã được patch sạch
+            local fn, err = loadstring(rawCode)
+            if fn then
+                fn()
+            else
+                -- Fallback nếu executor có vấn đề với loadstring
+                loadstring(game:HttpGet(TargetScriptUrl))()
+            end
+        else
+            -- Fallback tải trực tiếp
+            loadstring(game:HttpGet(TargetScriptUrl))()
+        end
     end)
 end)
